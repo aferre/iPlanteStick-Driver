@@ -12,6 +12,12 @@ import org.restlet.routing.Router;
 import com.iPlante.Driver.Serial.StickPort;
 import com.iPlante.Driver.Serial.StickPort.IPlanteDataListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
+import org.restlet.data.MediaType;
+import org.restlet.ext.json.JsonRepresentation;
+import org.restlet.representation.Representation;
 public class RestletServer extends Application {
 
 	static StickPort port = null;
@@ -83,7 +89,7 @@ public class RestletServer extends Application {
 
 		// Attach the application to the component and start it
 		component.getDefaultHost().attach(application);
-		component.start();
+		component.start();		
 	}
 
 }

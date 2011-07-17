@@ -54,6 +54,8 @@ public class StickPort {
 
 		void processRecord(Record r, String s);
 
+		public void processDump(List<Record> records);
+
 	}
 
 	public StickPort(String name) {
@@ -193,6 +195,7 @@ public class StickPort {
 				}
 				if (sReadBuff.indexOf("\n") > -1){
 					_messageLogger.info("msg has \\n, treat it");
+					//sReadBuff = sReadBuff.substring(0, sReadBuff.indexOf("\n"));
 					trtMsg(sReadBuff);
 					sReadBuff = "";
 				}if (sReadBuff.indexOf("\n\r") > -1){
@@ -205,7 +208,7 @@ public class StickPort {
 
 		}
 	}
-
+	
 	protected void trtMsg(String msg) {
 		_messageLogger.info("Received msg " + msg);
 
@@ -218,66 +221,40 @@ public class StickPort {
 
 			for (IPlanteDataListener lst : _listeners) {
 				if (cmd.startsWith("RA")) {
-					_messageLogger.info("DUMP");
-					lst.processDump(msg);
+					msg = msg.substring(2,msg.length());
+					List<Record> records = new ArrayList<Record>();
+					
+					while (msg.contains(";")){
+						_messageLogger.info("Msg is " + msg);
+						int indexOf = msg.indexOf(":");
+						String nbRec = msg.substring(1,indexOf);
+						int nb = Integer.parseInt(nbRec);
+						
+						msg = msg.substring(indexOf + 1, msg.length());
+						
+						String recStr = msg.substring(0, msg.indexOf(";"));
+						_messageLogger.info("RecStr is " + recStr);
+						
+						Record r = Record.parseRecord(recStr);
+						_messageLogger.info("Record is " + r.toString());
+						
+						records.add(r);
+						msg = msg.substring(msg.indexOf(";")+1);
+					}
+					
+					lst.processDump(records);
 				} 
 				//R111:Date:1/1/19700:0:47 T1:17.87 T2:17.38 Lumi:158 Humi:158
 				else if (cmd.startsWith("R")){
 					String back = msg;
-					_messageLogger.info("RECORD");
 					//split till :
 					int indexOf = msg.indexOf(":");
 					String nbRec = msg.substring(1,indexOf);
 					int nb = Integer.parseInt(nbRec);
-					_messageLogger.info("nbRec " + nb);
 					
 					msg = msg.substring(indexOf + 1, msg.length());
 					
-					indexOf = msg.indexOf(":");
-					msg = msg.substring(indexOf + 1, msg.length());
-					
-					indexOf = msg.indexOf("/");
-					String dayStr = msg.substring(0,indexOf);
-					int day = Integer.parseInt(dayStr);
-					msg = msg.substring(indexOf + 1, msg.length());
-					
-					indexOf = msg.indexOf("/");
-					String monthStr = msg.substring(0,indexOf);
-					int month = Integer.parseInt(monthStr);
-					msg = msg.substring(indexOf + 1, msg.length());
-					
-					indexOf = msg.indexOf(",");
-					String yearStr = msg.substring(0,indexOf);
-					int year = Integer.parseInt(yearStr);
-					msg = msg.substring(indexOf + 1, msg.length());
-					_messageLogger.info("year " + year);
-					
-					indexOf = msg.indexOf(":");
-					String hourStr = msg.substring(0,indexOf);
-					int hour = Integer.parseInt(hourStr);
-					msg = msg.substring(indexOf + 1, msg.length());
-					_messageLogger.info("hour " + hour);
-					
-					indexOf = msg.indexOf(":");
-					String minuteStr = msg.substring(0,indexOf);
-					int minute = Integer.parseInt(minuteStr);
-					msg = msg.substring(indexOf + 1, msg.length());
-					_messageLogger.info("minute " + minute);
-					
-					indexOf = msg.indexOf(",");
-					String secondStr = msg.substring(0,indexOf);
-					int second = Integer.parseInt(secondStr);
-					msg = msg.substring(indexOf + 1, msg.length());
-					
-					_messageLogger.info("Received Record " + nb + " : " + msg);
-					_messageLogger.info(day+"/"+month+"/"+year+" "+hour+":" + minute + ":"+ second);
-					
-					float tempIn;
-					float tempOut;
-					int lumi;
-					int humi;
-					
-					Record r = null;
+					Record r = Record.parseRecord(msg);
 					lst.processRecord(r,back);
 				}
 				else

@@ -10,5 +10,7 @@
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/Users/adrienferre/github/iPlanteStick-Driver/Driver - Eclipse/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/org.json_2.0/org.json.jar"/>
+	<classpathentry kind="lib" path="lib/org.restlet.ext.json.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
